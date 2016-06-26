@@ -208,7 +208,7 @@ class RefreshTokenGrantForm(ScopeMixin, OAuthForm):
             token = RefreshToken.objects.get(token=token,
                 expired=False, client=self.client)
         except RefreshToken.DoesNotExist:
-            raise OAuthValidationError({'error': 'invalid_grant'})
+            raise OAuthValidationError({'error': 'invalid_grant clean_refresh_token - params: {} {}'.format(token, self.client)})
 
         return token
 
@@ -249,7 +249,7 @@ class AuthorizationCodeGrantForm(ScopeMixin, OAuthForm):
             self.cleaned_data['grant'] = Grant.objects.get(
                 code=code, client=self.client, expires__gt=now())
         except Grant.DoesNotExist:
-            raise OAuthValidationError({'error': 'invalid_grant'})
+            raise OAuthValidationError({'error': 'invalid_grant clean_code - params: {} , {}'.format(code, self.client)})
 
         return code
 
@@ -302,7 +302,7 @@ class PasswordGrantForm(ScopeMixin, OAuthForm):
             password=data.get('password'))
 
         if user is None:
-            raise OAuthValidationError({'error': 'invalid_grant'})
+            raise OAuthValidationError({'error': 'invalid_grant clean'})
 
         data['user'] = user
         return data
@@ -316,7 +316,7 @@ class PublicPasswordGrantForm(PasswordGrantForm):
         grant_type = self.cleaned_data.get('grant_type')
 
         if grant_type != 'password':
-            raise OAuthValidationError({'error': 'invalid_grant'})
+            raise OAuthValidationError({'error': 'invalid_grant clean_grant_type - params: {} , {}'.format(grant_type)})
 
         return grant_type
 
